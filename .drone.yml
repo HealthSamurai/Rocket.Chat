@@ -39,6 +39,7 @@ pipeline:
       - ./node_modules
       - ./.meteor/local
 
+  docker:
     image: plugins/gcr
     registry: us.gcr.io
     repo: rk360-218819/rk-server
@@ -49,3 +50,11 @@ pipeline:
     secrets: [gcr_json_key]
     when:
       branch: develop
+
+  flush_cache:
+    image: homerovalle/drone-gcs-cache
+    pull: true
+    bucket: rocket-cache
+    secrets: [GCS_CACHE_JSON_KEY]
+    flush: true
+    flush_age: 14
