@@ -42,11 +42,11 @@ pipeline:
   docker:
     image: plugins/gcr
     registry: us.gcr.io
-    repo: rk360-218819/rk-server
+    repo: aidbox2-205511/rocketchat
     dockerfile: /drone/build/Dockerfile
     storage_driver: overlay
     context: /drone/build
-    tags: v${DRONE_COMMIT:0:8}
+    tags: ${DRONE_COMMIT:0:8}
     secrets: [gcr_json_key]
     when:
       branch: develop
