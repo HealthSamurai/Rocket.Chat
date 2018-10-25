@@ -1,13 +1,15 @@
 pipeline:
   restore-cache:
-    image: drillster/drone-volume-cache
+    image: homerovalle/drone-gcs-cache
+    pull: true
     restore: true
+    bucket: rocket-cache
+    secrets: [GCS_CACHE_JSON_KEY]
     mount:
       - /drone/.meteor/
       - ./node_modules
       - ./.meteor/local
-    volumes:
-      - /tmp/cache/Rocket.Chat:/cache
+
   build:
     image: ubuntu:16.04
     environment:
@@ -25,20 +27,25 @@ pipeline:
       - mkdir /drone/build
       - meteor build --allow-superuser --server-only --directory /drone/build
       - cp .docker/Dockerfile.local /drone/build/Dockerfile
+
   rebuild-cache:
-    image: drillster/drone-volume-cache
+    image: homerovalle/drone-gcs-cache
+    pull: true
     rebuild: true
+    bucket: rocket-cache
+    secrets: [GCS_CACHE_JSON_KEY]
     mount:
       - /drone/.meteor/
       - ./node_modules
       - ./.meteor/local
-    volumes:
-      - /tmp/cache/Rocket.Chat:/cache
-  docker:
-    image: plugins/docker
-    repo: rocketchat/rocket.chat
+
+    image: plugins/gcr
+    registry: us.gcr.io
+    repo: rk360-218819/rk-server
     dockerfile: /drone/build/Dockerfile
     storage_driver: overlay
     context: /drone/build
-    secrets: [ docker_username, docker_password ]
-    tag: designpreview
+    tags: v${DRONE_COMMIT:0:8}
+    secrets: [gcr_json_key]
+    when:
+      branch: develop
